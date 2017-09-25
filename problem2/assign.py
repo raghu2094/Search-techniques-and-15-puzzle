@@ -111,17 +111,19 @@ def solve(initialState):
         fringe = [initialState]
         while len(fringe) > 0:
             # print(len(fringe))
+            print([state.priority for state in fringe])
+            # if fringe.pop(0), djcran and kapadia will be stuck together forever :)
             for s in successors(fringe.pop()):
                 if is_goal(s):
                     return s
                 isInFringe = False
                 for eachState in fringe:
-                    if eachState.priority < s.priority:
+                    if eachState.priority <= s.priority:
                         fringe.insert(fringe.index(eachState), s)
                         isInFringe = True
                         break
                 if not isInFringe:
-                    fringe.insert(0, s)
+                    fringe.append(s)
         return False
 
 # main()
