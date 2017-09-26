@@ -2,10 +2,10 @@
 
 import heapq
 import math
+import sys
 
-
-city_routes = {}  #to store the file data in Dictionary
-gps = {}          #to store longitude and latitude of Cities
+city_routes = {}  # to store the file data in Dictionary
+gps = {}          # to store longitude and latitude of Cities
 
 def get_coordinates(city_gps):
     input_file = open(city_gps, "r")
@@ -15,9 +15,10 @@ def get_coordinates(city_gps):
 
 
 def read_input(road_segments):
-    '''
-        Reads the road-segments data into city_routes Dictionary
-    '''
+    """
+        Reads the road-segments data into city_routes Dictionary.
+        Ignores routes which have speed or distance as 0 or blank.
+    """
     input_file = open(road_segments, "r")
     for l in input_file:
         temp = l.split(" ")
@@ -34,6 +35,9 @@ def read_input(road_segments):
 
 
 def print_route(goal):
+    """
+    Prints the route to the goal in a similar way to Google Maps.
+    """
     total_miles = 0
     for i,g in enumerate(goal[2:-1]):
         temp = city_routes[g]
@@ -46,10 +50,16 @@ def print_route(goal):
 
 
 def is_goal(s,end_city):
+    """
+        Checks if the goal city has reached.
+    """
     return s == end_city
 
-
 def heuristic(current_city,goal_city="Bloomington,_Indiana"):
+    """
+    Returns heuristic value using Great Circle Formula.
+    If city or junction doesn't have latitude/longitude info in ctiy-gps file then take average of its neighbour's longitude and latitude.
+    """
     temp_x,temp_y,count = 0,0,0
     if current_city not in gps:
         for neighbours in city_routes[current_city]:
@@ -94,13 +104,25 @@ def successors_cost(temp,cost):
         return [[int(s[-3]) + int(temp[1]) + heuristic(temp[-1])] + [int(s[-3]) + int(temp[1])] + [float(s[-3]) / float(s[-2]) + float(temp[2])] + temp[3:] + [s[0]] for s in suc]
     return [[1+int(temp[0])]+[int(s[-3])+int(temp[1])]+[float(s[-3])/float(s[-2])+float(temp[2])]+temp[3:]+[s[0]] for s in suc]
 
+def successors_heuristic(temp,cost):
+    suc = city_routes[temp[-1]]
+    if cost == "distance":
+        return [ [int(s[-3]) + int(temp[1]) + heuristic(temp[-1])]+[int(s[-3])+int(temp[1])]+[float(s[-3])/float(s[-2])+float(temp[2])]+temp[3:]+[s[0]] for s in suc]
+    # elif cost == "time":
+    #     return [ [float(s[-3])/float(s[-2])+float(temp[0])]+[int(s[-3])+int(temp[1])]+[float(s[-3])/float(s[-2])+float(temp[2])]+temp[3:]+[s[0]] for s in suc]
+    # elif cost == "longtour":
+    #     return [ [-(int(s[-3]))+int(temp[0])]+[int(s[-3])+int(temp[1])]+[float(s[-3])/float(s[-2])+float(temp[2])]+temp[3:]+[s[0]] for s in suc]
+    # return [[1+int(temp[0])]+[int(s[-3])+int(temp[1])]+[float(s[-3])/float(s[-2])+float(temp[2])]+temp[3:]+[s[0]] for s in suc]
 
 def solve_dfs_bfs(start_city = "Abbot_Village,_Maine",end_city="Fairborn,_Ohio",type="bfs"):
     visited = {}
     fringe = []
     fringe.append([0,0,start_city])
     while len(fringe) > 0:
-        temp = fringe.pop()
+        if type == "bfs":
+            temp = fringe.pop(0)
+        else:
+            temp = fringe.pop()
         if temp[-1] in visited:
             pass
         else:
@@ -152,15 +174,35 @@ def solve_a_star(start_city = "San_Jose,_California",end_city="Bloomington,_Indi
                     continue
             else:
                 visited[temp[-1]] = temp[0]
-            for s in successors_cost(temp,cost):
+            for s in successors_heuristic(temp,cost):
                 heapq.heappush(fringe,s)
     return False
 
+
+start_city,end_city,routing_algorithm,cost_function = sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4]
+
 read_input("road-segments.txt")
 get_coordinates("city-gps.txt")
-#result = solve_dfs_bfs()
+
+if routing_algorithm == "bfs" or routing_algorithm == "dfs":
+    print_route(solve_dfs_bfs(start_city,end_city,routing_algorithm))
+elif routing_algorithm == "uniform":
+    print_route(solve_uniform(start_city,end_city,cost_function)[1:])
+else:
+    print_route(solve_a_star(start_city,end_city,cost_function)[1:])
+
 #print result
 # print_route(result)
 # print result[1:]
 
-print_route(solve_uniform()[1:])
+
+# San_Jose,_California Miami,_Florida uniform distance
+# San_Jose,_California Miami,_Florida heuristic heuristic
+# Seattle,_Washington Bloomington,_Indiana uniform distance
+# Seattle,_Washington Bloomington,_Indiana heuristic heuristic
+# Boston,_Massachusetts San_Francisco,_California heuristic heuristic
+# Boston,_Massachusetts San_Francisco,_California heuristic distance
+# Bloomington,_Indiana Chicago,_Illinois heuristic distance
+# Bloomington,_Indiana Chicago,_Illinois uniform distance
+
+
