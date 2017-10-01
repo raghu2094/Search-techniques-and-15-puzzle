@@ -34,8 +34,6 @@
 # For segment heuristic, I divided the great circle distance by 3000. I assumed the maximum number of segments between two cities to be 3000.
 
 
-
-
 #Search Algorithm:
 #I defined three seach algorithm for BFS/DFS,Uniform Cost Search and A* search.
 # BFS search algorithm traverses nodes with minimum depth first. It doesn't consider the cost function. It also keeps track of visited states
@@ -88,7 +86,7 @@
 # Heuristic is not consistent, few nodes are expanded again, which decreases the efficiency of A* by some amount.
 # For time and segment cost function, the heuristic is weak. Heuristic gives data fro the distance between the two cities in miles.
 # It doesn't give information about the time or segments between them. I had to assume the maximum speed and maximum number of segments
-# between two cities to make. It make heuristic weaker, but is admissible.
+# between two cities to make. It makes heuristic weaker, but is admissible.
 
 
 import heapq
