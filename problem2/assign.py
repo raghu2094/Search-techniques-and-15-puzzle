@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 # Professor David Crandall
 # B551 Elements of Artificial Intelligence
 # Yue Chen, Siddharth Jayant Pathak, and Raghottam Dilip Talwai
@@ -15,6 +17,10 @@ class Survey:
         self.prefer = prefer.split(",") if prefer != "_" else []
         self.notPrefer = notPrefer.split(",") if notPrefer != "_" else []
         Survey.count += 1
+
+    def __repr__(self):
+        return self.name
+
 
 def successors(state):
 
@@ -111,7 +117,7 @@ def solve(initialState):
         fringe = [initialState]
         while len(fringe) > 0:
             # print(len(fringe))
-            print([state.priority for state in fringe])
+            # print([state.priority for state in fringe])
             # if fringe.pop(0), djcran and kapadia will be stuck together forever :)
             for s in successors(fringe.pop()):
                 if is_goal(s):
@@ -132,8 +138,8 @@ import sys, copy, math
 
 inputFileName = sys.argv[1]
 gradeTime = int(sys.argv[2])
-emailTime = int(sys.argv[3])
-meetTime = int(sys.argv[4])
+emailTime = int(sys.argv[4])
+meetTime = int(sys.argv[3])
 
 inputFile = open(inputFileName, 'r')
 
@@ -141,7 +147,7 @@ people = []
 
 for line in inputFile:
     person = line.split()
-    people.append(Survey(name=person[0],number=person[1], prefer=person[2], notPrefer=person[3]))
+    people.append(Survey(name=person[0],number=int(person[1]), prefer=person[2], notPrefer=person[3]))
 
 initialState = State(assigned=[], people=people)
 
@@ -149,4 +155,8 @@ initialState.set_time(gradeTime=gradeTime, emailTime=emailTime, meetTime=meetTim
 
 solution = solve(initialState)
 
-print(solution.assigned)
+# print(solution.assigned, solution.priority)
+
+for group in solution.assigned:
+    print(" ".join([person.name for person in group]))
+print(solution.priority)

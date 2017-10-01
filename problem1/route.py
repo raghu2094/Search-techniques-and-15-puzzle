@@ -1,4 +1,6 @@
-# put your routing program here!
+#B-551 Elements of AI. Prof. Crandall
+#Assignment 1, question 1
+
 
 import heapq
 import math
@@ -7,11 +9,12 @@ import sys
 city_routes = {}  # to store the file data in Dictionary
 gps = {}          # to store longitude and latitude of Cities
 
+
 def get_coordinates(city_gps):
     input_file = open(city_gps, "r")
     for line in input_file:
         temp = line.strip().split(" ")
-        gps[temp[0]] = (float(temp[1]),float(temp[2]))
+        gps[temp[0]] = (float(temp[1]), float(temp[2]))
 
 
 def read_input(road_segments):
@@ -22,7 +25,7 @@ def read_input(road_segments):
     input_file = open(road_segments, "r")
     for l in input_file:
         temp = l.split(" ")
-        if temp[-3] !='' and temp[-2] !='':
+        if temp[-3] != '' and temp[-2] != '':
             if int(temp[-3]) != 0 and int(temp[-2]) != 0:
                 if temp[0] in city_routes:
                     city_routes[temp[0]].append(temp[1:])
@@ -34,19 +37,37 @@ def read_input(road_segments):
                     city_routes[temp[1]] = [temp[:1]+temp[2:]]
 
 
-def print_route(goal):
+def print_route(end_city, goal):
     """
     Prints the route to the goal in a similar way to Google Maps.
     """
-    total_miles = 0
-    for i,g in enumerate(goal[2:-1]):
-        temp = city_routes[g]
-        for x in temp:
-            if x[0] == goal[i+3]:
-                print "From ",goal[i+2]," to ", x[0], "via ", x[-1][:-1],"(",x[-3]," miles)"
-                total_miles = total_miles + int(x[-3])
-                break
-    print "Total Miles: ", total_miles, "Time Required: ", goal[1], "at average speed of: " , float(total_miles/goal[1]), "mph"
+    total_miles,time_required =0,0
+    temp_end_city = end_city
+    temp = goal[temp_end_city]
+    result = []
+    while temp[0] is not None:
+        result.append(["From ", temp[0], " to ", temp_end_city, "via", temp[-1].strip(), "(", temp[1], " miles)"])
+        total_miles = total_miles + float(temp[1])
+        time_required = time_required + float(temp[2])
+        temp_end_city = temp[0]
+        temp = goal[temp_end_city]
+    for r in reversed(result):
+        for x in r:
+            print x,
+        print
+    temp = goal[end_city]
+    result = []
+    result.append(end_city)
+    while temp[0] is not None:
+        result.append(temp[0])
+        temp_end_city = temp[0]
+        temp = goal[temp_end_city]
+
+
+    print "Total Miles:", total_miles, "Time Required:", time_required , "at average speed of:", float(total_miles / time_required), "mph"
+    print total_miles,time_required,
+    for p in result[::-1]:
+        print p,
 
 
 def is_goal(s,end_city):
@@ -55,7 +76,7 @@ def is_goal(s,end_city):
     """
     return s == end_city
 
-def heuristic(current_city,goal_city="Bloomington,_Indiana"):
+def heuristic(current_city,goal_city):
     """
     Returns heuristic value using Great Circle Formula.
     If city or junction doesn't have latitude/longitude info in ctiy-gps file then take average of its neighbour's longitude and latitude.
@@ -67,13 +88,10 @@ def heuristic(current_city,goal_city="Bloomington,_Indiana"):
                 temp_x = temp_x + gps[neighbours[0]][0]
                 temp_y = temp_y + gps[neighbours[0]][1]
                 count = count + 1
-            else:
-                for neighbours_2 in city_routes[neighbours[0]]:
-                    if neighbours_2[0] in gps:
-                        temp_x = temp_x + gps[neighbours_2[0]][0]
-                        temp_y = temp_y + gps[neighbours_2[0]][1]
-                count = count +1
-        x1,y1 = temp_x/count,temp_y/count
+        if count != 0:
+            x1,y1 = temp_x/count,temp_y/count
+        else:
+            x1,y1=0,0
     else:
         x1,y1 = gps[current_city]
 
@@ -82,42 +100,41 @@ def heuristic(current_city,goal_city="Bloomington,_Indiana"):
     y1 = math.radians(y1)
     x2 = math.radians(x2)
     y2 = math.radians(y2)
-    distance = 60.0 * (math.degrees(math.acos(math.sin(x1) * math.sin(x2) \
-         + math.cos(x1) * math.cos(x2) * math.cos(y1 - y2))))
+    distance = float(69.1105 * (math.degrees(math.acos(math.sin(x1) * math.sin(x2) \
+         + math.cos(x1) * math.cos(x2) * math.cos(y1 - y2)))))
     return distance
 
 
-def successors(temp):
-    suc = city_routes[temp[-1]]
-    return [ [int(s[-3])+int(temp[0])]+[float(s[-3])/float(s[-2])+float(temp[1])] + temp[2:]+[s[0]] for s in suc]
-
-
-def successors_cost(temp,cost):
+def successors(temp,cost="bfs/dfs"):
     suc = city_routes[temp[-1]]
     if cost == "distance":
-        return [ [int(s[-3])+int(temp[0])]+[int(s[-3])+int(temp[1])]+[float(s[-3])/float(s[-2])+float(temp[2])]+temp[3:]+[s[0]] for s in suc]
+        return [ [int(s[-3])+int(temp[0])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+ [temp[-1]]+ [s[0]] for s in suc]
     elif cost == "time":
-        return [ [float(s[-3])/float(s[-2])+float(temp[0])]+[int(s[-3])+int(temp[1])]+[float(s[-3])/float(s[-2])+float(temp[2])]+temp[3:]+[s[0]] for s in suc]
+        return [ [float(s[-3])/float(s[-2])+float(temp[0])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
     elif cost == "longtour":
-        return [ [-(int(s[-3]))+int(temp[0])]+[int(s[-3])+int(temp[1])]+[float(s[-3])/float(s[-2])+float(temp[2])]+temp[3:]+[s[0]] for s in suc]
-    elif cost == "heuristic":
-        return [[int(s[-3]) + int(temp[1]) + heuristic(temp[-1])] + [int(s[-3]) + int(temp[1])] + [float(s[-3]) / float(s[-2]) + float(temp[2])] + temp[3:] + [s[0]] for s in suc]
-    return [[1+int(temp[0])]+[int(s[-3])+int(temp[1])]+[float(s[-3])/float(s[-2])+float(temp[2])]+temp[3:]+[s[0]] for s in suc]
+        return [ [-(int(s[-3]))+int(temp[0])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
+    elif cost == "segments":
+        return [[1+int(temp[0])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
+    else:
+        return [[0]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]]for s in suc]
 
 def successors_heuristic(temp,cost):
     suc = city_routes[temp[-1]]
     if cost == "distance":
-        return [ [int(s[-3]) + int(temp[1]) + heuristic(temp[-1])]+[int(s[-3])+int(temp[1])]+[float(s[-3])/float(s[-2])+float(temp[2])]+temp[3:]+[s[0]] for s in suc]
-    # elif cost == "time":
-    #     return [ [float(s[-3])/float(s[-2])+float(temp[0])]+[int(s[-3])+int(temp[1])]+[float(s[-3])/float(s[-2])+float(temp[2])]+temp[3:]+[s[0]] for s in suc]
-    # elif cost == "longtour":
-    #     return [ [-(int(s[-3]))+int(temp[0])]+[int(s[-3])+int(temp[1])]+[float(s[-3])/float(s[-2])+float(temp[2])]+temp[3:]+[s[0]] for s in suc]
-    # return [[1+int(temp[0])]+[int(s[-3])+int(temp[1])]+[float(s[-3])/float(s[-2])+float(temp[2])]+temp[3:]+[s[0]] for s in suc]
+        return [[float(s[-3])+float(temp[1])+heuristic((s[0]),end_city)]+[float(s[-3])+float(temp[1])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
+    elif cost == "time":
+        return [[float(s[-3])/float(s[-2])+float(temp[1])+heuristic((s[0]),end_city)/85.0]+[float(s[-3])/float(s[-2])+float(temp[1])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
+    elif cost == "segments":
+         return [[1+float(temp[1])+heuristic((s[0]),end_city)/4000]+[1+float(temp[1])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
+    else:
+        return [[float(s[-3])+float(temp[1])+heuristic((s[0]),end_city)]+[float(s[-3])+float(temp[1])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
 
-def solve_dfs_bfs(start_city = "Abbot_Village,_Maine",end_city="Fairborn,_Ohio",type="bfs"):
+
+def solve_dfs_bfs(start_city,end_city,type):
     visited = {}
     fringe = []
-    fringe.append([0,0,start_city])
+    trace_route = {}
+    fringe.append([0,0,0,None,None,start_city])
     while len(fringe) > 0:
         if type == "bfs":
             temp = fringe.pop(0)
@@ -126,55 +143,66 @@ def solve_dfs_bfs(start_city = "Abbot_Village,_Maine",end_city="Fairborn,_Ohio",
         if temp[-1] in visited:
             pass
         else:
+            trace_route[temp[-1]] = (temp[-2], temp[1], temp[2], temp[-3])
             visited[temp[-1]] = 1
             for s in successors(temp):
                 if is_goal(s[-1],end_city):
-                    return s
+                    trace_route[s[-1]] = (s[-2], s[1], s[2], s[-3])
+                    return trace_route
                 fringe.append(s)
     return False
 
 
-def solve_uniform(start_city = "San_Jose,_California",end_city="Bloomington,_Indiana",cost="distance"):
+def solve_uniform(start_city,end_city,cost):
     visited = {}
     fringe = []
-    heapq.heappush(fringe,[0,0,0,start_city])
-    #fringe.append([0,0,0,start_city])
+    trace_route = {}
+    heapq.heappush(fringe,[0,0,0,None,None,start_city])
     while len(fringe) > 0:
         temp = heapq.heappop(fringe)
-        #fringe = sorted(fringe,key = itemgetter(0))
-        #temp = fringe.pop(0)
         if is_goal(temp[-1],end_city):
-            return temp
+            trace_route[temp[-1]] = (temp[-2], temp[1], temp[2], temp[-3])
+            return trace_route
         if temp[-1] in visited:
             pass
         else:
+            trace_route[temp[-1]] = (temp[-2], temp[1], temp[2], temp[-3])
             visited[temp[-1]] = 1
-            for s in successors_cost(temp,cost):
+            for s in successors(temp,cost):
                 heapq.heappush(fringe,s)
-                #fringe.append(s)
     return False
 
-def solve_a_star(start_city = "San_Jose,_California",end_city="Bloomington,_Indiana",cost="heuristic"):
+
+
+def solve_a_star(start_city,end_city,cost):
     visited = {}
     fringe = []
-    heapq.heappush(fringe,[0,0,0,start_city])
-    #fringe.append([0,0,0,start_city])
+    trace_route = {}
+    heapq.heappush(fringe,[0,0,0,None,None,start_city])
     while len(fringe) > 0:
         temp = heapq.heappop(fringe)
-        #fringe = sorted(fringe,key = itemgetter(0))
-        #temp = fringe.pop(0)
         if is_goal(temp[-1],end_city):
-            return temp
+            trace_route[temp[-1]] = (temp[-2], temp[2], temp[3], temp[-3])
+            return trace_route
+        if temp[-1] in visited:
+            if visited[temp[-1]] > temp[0]:
+                visited.pop(temp[-1])
+        if temp[-1] in visited:
+            pass
         else:
-            if temp[-1] in visited:
-                if visited[temp[-1]] > temp[0]:
-                    visited[temp[-1]] = temp[0]
-                else:
-                    visited[temp[-1]] = temp[0]
-                    continue
-            else:
-                visited[temp[-1]] = temp[0]
+            trace_route[temp[-1]] = (temp[-2], temp[2], temp[3], temp[-3])
+            visited[temp[-1]] = temp[0]
             for s in successors_heuristic(temp,cost):
+                # If the element is already in fringe with a high value then remove that element.
+                # But if we keep both the elements in the fringe then the lower value element will be popped and marked as visited.
+                # If it's marked as visited, then even if we pop it next time it won't be explored. Removing element from fringe
+                # is increasing the time taken to run, as it searches the whole fringe and sorts it again after removing.
+                # Reference: Piazza Question 151.
+                # for i,s1 in enumerate(fringe):
+                #     if s1[-1] == s[-1]:
+                #         if s1[0] > s[0]:
+                #             fringe.pop(i)
+                #             heapq.heapify(fringe)
                 heapq.heappush(fringe,s)
     return False
 
@@ -185,17 +213,15 @@ read_input("road-segments.txt")
 get_coordinates("city-gps.txt")
 
 if routing_algorithm == "bfs" or routing_algorithm == "dfs":
-    print_route(solve_dfs_bfs(start_city,end_city,routing_algorithm))
+    print_route(end_city,solve_dfs_bfs(start_city,end_city,routing_algorithm))
 elif routing_algorithm == "uniform":
-    print_route(solve_uniform(start_city,end_city,cost_function)[1:])
+    print_route(end_city,solve_uniform(start_city,end_city,cost_function))
 else:
-    print_route(solve_a_star(start_city,end_city,cost_function)[1:])
-
-#print result
-# print_route(result)
-# print result[1:]
+    print_route(end_city,solve_a_star(start_city,end_city,cost_function))
 
 
+
+#Test Cases:
 # San_Jose,_California Miami,_Florida uniform distance
 # San_Jose,_California Miami,_Florida heuristic heuristic
 # Seattle,_Washington Bloomington,_Indiana uniform distance
@@ -204,5 +230,6 @@ else:
 # Boston,_Massachusetts San_Francisco,_California heuristic distance
 # Bloomington,_Indiana Chicago,_Illinois heuristic distance
 # Bloomington,_Indiana Chicago,_Illinois uniform distance
+# Abbot_Village,_Maine Fairborn,_Ohio heuristic distance
 
 
