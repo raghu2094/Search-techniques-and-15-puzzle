@@ -55,7 +55,7 @@ def move_horizontal(G,i,j,path):
         left=left+1
         s2=[s1,moves]
         s.append(s2)           
-        #print("move left done")
+
 
 #To move blank tile in the vertical direction
 
@@ -95,44 +95,34 @@ def move_vertical(G,i,j,path):
         s.append(s2)
 
 
-#Misplaced Tiles heuristic
-def misplaced_heuristic(MP):
-    count=0
-    for i in range(4):
-        for j in range(4):
-            if MP[i][j]!=goal_state[i][j]:
-               #print("Misplaced tile at %d,%d:"%(i,j))
-               count+=1
-    return (count/3)
-
 def Linear_conflict(LC):
     conflicts=0
     for row in range(4):
         max = -1
         for col in range(4):
-            #print("Element is: %d" % LC[row][col])
+
             if LC[row][col] != 0 and int((LC[row][col] - 1) / 4) == row:
 
                 if LC[row][col] > max:
                     max = LC[row][col]
                 else:
-                    #print("Adding")
+
                     conflicts += 2
 
-    #print("Row Conflict is %d" % lin)
+
     for col in range(4):
         max = -1
         for row in range(4):
-            #print("Element is: %d" % LC[row][col])
-            if LC[row][col] != 0 and int((LC[row][col] % 4)) == col + 1:
+
+            if LC[row][col] != 0 and int((LC[row][col] % 4)) == (col + 1)%4 :
 
                 if LC[row][col] > max:
                     max = LC[row][col]
                 else:
-                    #print("Adding")
+
                     conflicts += 2
 
-    #print("Column Conflict is %d" % lin)
+
     return conflicts
 
 
@@ -142,19 +132,18 @@ def manhattan_heuristic(MD):
     for x in range(4):
         for y in range(4):
             tile=MD[x][y]
+            if tile == 0:
+                continue
+            else:
+                for x_goal , k in enumerate(goal_state):
+                    if tile in k:
+                     y_goal= k.index(tile)
+                     break
+                heuristic+= abs(x-x_goal)+abs(y-y_goal)
             
-            for x_goal , k in enumerate(goal_state):
-                if tile in k:
-                    y_goal= k.index(tile)
-                    break
-            #print("MD for %d is %d"%(tile,abs(i-x_goal)+abs(j-y_goal)) )  
-            
-            heuristic+= abs(x-x_goal)+abs(y-y_goal)
-            
-    #print("MD IS: %d" %sum)
+
     lc= Linear_conflict(MD)
-    #print("MD with lc is %d" %(sum+lc))
-    return(heuristic + lc)
+    return(heuristic/3 + lc)
 
 
 
@@ -167,9 +156,6 @@ def successors(G,path):
              move_horizontal(G,row,col,path)
              move_vertical(G,row,col,path)
              return s
-
-
-
 
 def is_goal(s):
     if s==goal_state:
@@ -185,7 +171,7 @@ def check_infringe(succ,fringe):
         for i,j in enumerate(fringe):
             
             if succ == j[1][0]:
-                #print(" in fringe",A)
+
                 return(i,j[0],True)
             else:
                 return(0,0,False)
@@ -195,82 +181,97 @@ def solve(matrix):
     cost=0
     initial_move=' '
     fringe=[]
-
-    heapq.heappush(fringe,(0, [matrix,initial_move,cost]))
+    heapq.heappush(fringe,(0,[matrix,initial_move,cost]))
     popped=[]
     
-    #print ("fringe is ",fringe)
-    
     while len(fringe)>0:
-        
         #Popping lowest cost state
-
         popped=heapq.heappop(fringe)
 
-        print("popping with total_cost= %d: "%popped[0])
+        #print("popping with total_cost= %f: "%popped[0])
         state=popped[-1][0]
-        
+
         #Storing Moves
         path= popped[-1][1]
-            
-        #Adding to visited states
-        visited.append(state)
 
-        #Checking goal condition
+        # Checking goal condition
         if is_goal(state):
-            print("No of nodes visitied before reaching goal: %d" %(len(visited)-1))
+            print("No of nodes visitied before reaching goal: %d" % (len(visited) - 1))
+            return (path)
 
-            return(path)
+        if state in visited:
+            continue
+        else:
 
-        #Cost of moving a tile
-        cost= popped[-1][2]+1
+            #Adding to visited states
+            visited.append(state)
+            #Cost of moving a tile
+            cost= popped[-1][2]+1
 
-        for succ in successors(state, path):
-            #print("s1 is ",s1[0])
+            for succ in successors(state, path):
+                #if succ[0] in visited:
+                    #continue
+                succ.append(cost)
+                #Calculating heuristic
+                total_cost = manhattan_heuristic(succ[0])+cost
+                index,h1,in_fringe= check_infringe(succ[0],fringe)
+
+                #Checking if a larger s' exists in fringe
+                if in_fringe == True and h1 > total_cost:
+                    del fringe[index]
+                    heapq.heapify(fringe)
+                    heapq.heappush(fringe,(total_cost,succ))
+
+                elif in_fringe == False:
+                    #Append successor in the fringe
+                    heapq.heappush(fringe,(total_cost,succ))
             
-            if succ[0] in visited:
-                continue
-
-            succ.append(cost)
-            #Calculating heuristic
-            #total_cost=misplaced_heuristic(s1[0])+cost
-            total_cost = manhattan_heuristic(succ[0])+cost
-
-            index,h1,in_fringe= check_infringe(succ[0],fringe)
-
-            #Checking if a larger s' exists in fringe
-            if h1>total_cost:
-                
-                del fringe[index]
-                heapq.heappush(fringe,(total_cost,succ))
-
-            elif in_fringe==False:
-            #Append successor in the fringe
-                
-                heapq.heappush(fringe,(total_cost,succ))
-            
-        #Clearing the successors list for new iteration
-        del s[:]
+            #Clearing the successors list for new iteration
+            del s[:]
     return False
 
 
+def check_parity(initial_puzzle):
+
+    parity=[ele for l in initial_puzzle for ele in l]
+    count = 0
+    for i, ele in enumerate(parity):
+        if ele == 0:
+            pos = int(i / 4)
+            continue
+        for j in range(i + 1, len(parity)):
+            if parity[j] == 0:
+                continue
+            elif ele > parity[j]:
+                count += 1
+
+    pos_above = (4 - pos) % 2
+    if (count % 2 == 0 and pos_above != 0) or (count % 2 != 0 and pos_above == 0):
+        return True
+    else:
+        return False
+
 # Main
 
-filename='input1'
+filename='input1.txt'
 #filename=sys.argv[1]
 initial_state=[]
-with open(filename+'.txt','r') as b1:
-    for line in b1:
-        line=line.split()
-            
-        line = [int(i) for i in line]
-        initial_state.append(line)
-print ("initial state is :",initial_state)
-solution = solve(initial_state)
+with open(filename,'r') as b1:
+    initial_state = [[int(i) for i in line.split()] for line in b1]
 
-if solution:
-    print("Solution found")
-    print(solution)
+print ("Given puzzle is :",initial_state)
+if is_goal(initial_state):
+        print("Input provided is the goal state ")
+else:
+    check= check_parity(initial_state)
+    if check == False:
+        print("Sorry, puzzle not solvable")
+    else:
+        solution = solve(initial_state)
+        if solution:
+            print("Solution found")
+            print(solution)
     
     
 
+:
