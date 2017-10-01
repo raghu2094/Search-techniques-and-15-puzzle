@@ -138,8 +138,8 @@ import sys, copy, math
 
 inputFileName = sys.argv[1]
 gradeTime = int(sys.argv[2])
-emailTime = int(sys.argv[3])
-meetTime = int(sys.argv[4])
+emailTime = int(sys.argv[4])
+meetTime = int(sys.argv[3])
 
 inputFile = open(inputFileName, 'r')
 
