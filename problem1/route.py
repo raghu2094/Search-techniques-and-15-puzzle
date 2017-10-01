@@ -1,5 +1,94 @@
-#B-551 Elements of AI. Prof. Crandall
-#Assignment 1, question 1
+
+# Fall 2017, B-551 Elements of AI. Prof. Crandall
+# Assignment 1, Question 1
+
+
+# The search problem has the given data and routes between several different cities. I stored all the routes along with their other info into a dictionary.
+# Storing the data into dictionary made fetching the neighbour cities from its current cities fast in constant time.
+# Once the neighbour cities are found, the search algorithm determines which city to explore first.
+
+
+# State Space: All the neighbours of current city/junction along with their cost,distance,speed and highway name connecting them. Each state also contains the
+# parent city -- the city from which the neighbour city was reached.
+
+# Successor Function: Successor function checks the city_routes dictionary city_routes dictionary stores the road-segments.txt data for faster access.
+# For each neighbour of the current city, it creates a state which contains the distance,time,highway name between the current city and neighbours.
+
+# The edge weights differ as cost function differs.
+# For distance cost function, edge weight is the distance between two cities.
+# For time cost function, edge weight is the time required to travel between two cities. Time take is distance between two cities divided by the maximum highway speed
+# For segment cost function, edge weight is constant 1. Each connection between two ciites is 1 segment in the search graph
+
+#Heuristic:
+# For A*, I used great circle distance between the current city and the goal city. For calculating great circle distance, I used the latitude and longitude
+# provided in the city-gps file for each city.
+# The data contains some noise, like few cities present in the city_routes file don't have their latitude and longitude present in city-gps file.
+# If the data is not present then I calculated the average of the latitude and longitude of its neighbours. If even the neighbours don't have their
+# latitude and longitude then I assumed their heuristic to be zero.
+# In some cases the heuristic might become inadmissible. if the latitude and longitude values are not present.
+# For example, if the neighbours of the junction are skewed to be far away from the goal, then their average latitude and longitude will be
+# further away from the goal, which will make the heuristic inadmissible.
+# The heuristic is admissible, but not consistent. For majority of the cities it is admissible and consistent as the data gives the correct latitude and
+# longitude values. But for some cities, the latitude and longitude data is not correct, which makes the heuristic unadmissble in some test cases.
+# Heuristic is not consistent, because of which I kept track of city and its respective cost in visited array. If the city has been visited before but with
+# higher cost then visit it again.
+# For time heuristic, I divided the great circle distance by speed of 70. I assumed the value to be 70 as the maximum speed in the given data is 65.
+# For segment heuristic, I divided the great circle distance by 1200. The maximum number of segments between two cities on the west cost(Tiuajana,California) and
+# east cost (Bayfield,New Brunswick) is 1300.
+# Assuming values more than the maximum values in the data makes the heuristic admissible, but it becomes weaker.
+
+
+
+#Search Algorithm:
+#I defined three seach algorithm for BFS/DFS,Uniform Cost Search and A* search.
+# BFS search algorithm traverses nodes with minimum depth first. It doesn't consider the cost function. It also keeps track of visited states
+# to avoid expanding the same city twice.
+# In DFS search it pops the node and expands it as far as possible. It doesn't consider the cost function. It also keeps track of visited states
+# to avoid expanding the same city twice.
+# In uniform cost function, the algorithm pops the node which has the lowest edge weight in the fringe. The edge weight depends upom the cost function.
+# Edge weight is the cost till the parent city and the edge weight of parent city to its successors.
+# Uniform Cost function requires fringe to be a priority queue. I used Python's heapq module for implementing priority queue.
+# A* algorithm pops the node which has minimum edge weight. In case of A*, edge weight is the summation of the distance travelled till now plus the heuristic.
+# As the heuristic is not consistent, I kept track of the visited nodes along with their heuristic when they were visited. If the heuristic when they were visited
+# first is more than the current node's heuristic then expand the node again.
+
+
+#Problems faced:
+# Majority of the problems I faced were because of missing data. For example, once I decided my heuristic to be the great circle distance between two cities,
+# I was not able to calculate it for city as they didn't have latitude and longitude in the city-gps.txt file.
+# Also, some the cities have wrong latitude and longitude values. I thought my A* search algorithm is not working properly, but after looking into the data and a lot of debugging,
+# I realised that few cities don't have correct Latitude and Longitude values. For example, Mission_Hills,_California has wrong latitude and longitude values.
+
+#Assumptions:
+
+# If in the given data, the distance between two cities is absent or 0 then I ignored that city.
+# Similarly, if speed between two cities is absent or 0 then I ignored that city.
+# If a city doesn't have its latitude and longitude values in city-gps, then I calculated its latitude and longitude based on its neighbours.
+# If even the neighbours don't have latitude and longitude then I assumed the city's heuristic to be 0.
+
+
+
+# Analysis
+# 1. A* seems to work best for each routing option. Because of A* the number of nodes expanded are less than that of Uniform Cost and BFS/DFS.
+# But in some cases, the heuristic is weak because of some data noise, then it overestimates the distance.
+# In terms of optimality, Uniform cost search always gives optimal path but is not as effecient as A* with a good heuristic.
+# If data didn't have noise then A* star would have been the best routing algorithm, but as the heuristic is weak the computation time difference between A* and UCS is not much.
+
+# 2. A* with a correct heuristic is more effecient than other algorithms. BFS and DFS don't give optimal path. but for some cases they do take less computation time.
+# A* takes less time to compute because of heuristic function. It expands less number of nodes as compared to the other searhc algorihtms. But it spends some time in calculating
+# heuristic value for each city. If the time spent is less for calculating heuristic, then A* will run faster. Performace of A* star depends on how strong the heuristic function is.
+
+# Number of nodes expanded and computation time taken in A* vs UCS:
+# San_Jose,_California to Miami,_Florida A* : 2018,0.198 seconds UCS : 5848, 0.280 seconds
+# San_Jose,_California to Bloomington,_Indiana A*: 937, 0.164 seconds UCS: 3879, 0.232 seconds
+# Bloomington,_Indiana to Seattle,_Washintgon A*: 2866, 0.226 seconds UCS: 6272 0.286 seconds
+# Bloomington,_Indiana to Texas,_Dallas A* 544, 0.151 seconds UCS: 3987 0.227 seconds
+
+#3 Heuristic function:
+# I used Great Circle distance as heuristic value. It is admissible given the latitude and longitude values are accurate in the given data.
+# As the data has noise, because of which some cities don't have latitude and longitude values.It makes the heuristic inadmissible and weak.
+# Heuristic function can be improved by having accurate data for all the cities.
+# Heuristic is not consistent, few nodes are expanded again, which decreases the efficiency of A* by some amount.
 
 
 import heapq
@@ -8,9 +97,17 @@ import sys
 
 city_routes = {}  # to store the file data in Dictionary
 gps = {}          # to store longitude and latitude of Cities
+visited_states = {}
+
+
+states = ['Mississippi', 'Iowa', 'Oklahoma', 'Wyoming', 'Minnesota', 'New_Jersey', 'Arkansas', 'Indiana', 'Maryland', 'Louisiana', 'New_Hampshire', 'Texas', 'New_York', 'Arizona', 'Wisconsin', 'Michigan', 'Kansas', 'Utah', 'Virginia', 'Oregon', 'Connecticut', 'Montana', 'California', 'Idaho', 'New_Mexico', 'South_Dakota', 'Massachusetts', 'Vermont', 'Georgia', 'Pennsylvania', 'Florida', 'North_Dakota', 'Tennessee', 'Nebraska', 'Kentucky', 'Missouri', 'Ohio', 'Alabama', 'Illinois', 'Colorado', 'Washington', 'West_Virginia', 'South_Carolina', 'Rhode_Island', 'North_Carolina', 'Nevada', 'Delaware', 'Maine']
 
 
 def get_coordinates(city_gps):
+    """
+        Reads the city latitude and longitude values from
+        into gps dictionary.
+    """
     input_file = open(city_gps, "r")
     for line in input_file:
         temp = line.strip().split(" ")
@@ -72,10 +169,11 @@ def print_route(end_city, goal):
 
 def is_goal(s,end_city):
     """
-        Checks if the goal city has reached.
+        Checks if t`he goal city has reached.
     """
     return s == end_city
 
+# Referred: https://en.wikipedia.org/wiki/Great-circle_distance and
 def heuristic(current_city,goal_city):
     """
     Returns heuristic value using Great Circle Formula.
@@ -106,26 +204,47 @@ def heuristic(current_city,goal_city):
 
 
 def successors(temp,cost="bfs/dfs"):
+    """
+        Generates successors for bfs,dfs and uniform cost search.
+    """
     suc = city_routes[temp[-1]]
+    res = []
     if cost == "distance":
-        return [ [int(s[-3])+int(temp[0])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+ [temp[-1]]+ [s[0]] for s in suc]
+        return [[int(s[-3])+int(temp[0])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+ [temp[-1]]+ [s[0]] for s in suc]
     elif cost == "time":
-        return [ [float(s[-3])/float(s[-2])+float(temp[0])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
+        return [[float(s[-3])/float(s[-2])+float(temp[0])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
     elif cost == "longtour":
-        return [ [-(int(s[-3]))+int(temp[0])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
+        return [[-(int(s[-3]))+int(temp[0])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
     elif cost == "segments":
         return [[1+int(temp[0])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
+    elif cost == "statetour":
+        for s in suc:
+            if s[0].split(",")[-1][1:] not in states:
+                continue
+            if s[0].split(",")[-1][1:] not in visited_states and s[0].split(",")[-1][1:] in states:
+                res.append([((int(s[-3])) + int(temp[0]))-len(visited_states)*10000] + [int(s[-3])] + [float(s[-3]) / float(s[-2])] + [s[-1]] + [temp[-1]] + [s[0]])
+            else:
+                res.append([int(s[-3]) + int(temp[0])] + [int(s[-3])] + [float(s[-3]) / float(s[-2])] + [s[-1]] + [temp[-1]] + [s[0]])
+        return res
     else:
         return [[0]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]]for s in suc]
 
+
 def successors_heuristic(temp,cost):
+    """
+        Generates successors for A* algorithm.
+    """
     suc = city_routes[temp[-1]]
     if cost == "distance":
         return [[float(s[-3])+float(temp[1])+heuristic((s[0]),end_city)]+[float(s[-3])+float(temp[1])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
     elif cost == "time":
-        return [[float(s[-3])/float(s[-2])+float(temp[1])+heuristic((s[0]),end_city)/85.0]+[float(s[-3])/float(s[-2])+float(temp[1])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
+        return [[float(s[-3])/float(s[-2])+float(temp[1])+heuristic((s[0]),end_city)/70.0]+[float(s[-3])/float(s[-2])+float(temp[1])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
     elif cost == "segments":
-         return [[1+float(temp[1])+heuristic((s[0]),end_city)/4000]+[1+float(temp[1])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
+        return [[1+float(temp[1])+heuristic((s[0]),end_city)/1000]+[1+float(temp[1])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
+    elif cost == "longtour":
+        return [[-(float(s[-3])+float(temp[1])+ (heuristic((s[0]),end_city)))]+[float(s[-3])+float(temp[1])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
+    elif cost == "statetour":
+        return
     else:
         return [[float(s[-3])+float(temp[1])+heuristic((s[0]),end_city)]+[float(s[-3])+float(temp[1])]+[int(s[-3])]+[float(s[-3])/float(s[-2])]+[s[-1]]+[temp[-1]]+[s[0]] for s in suc]
 
@@ -154,6 +273,7 @@ def solve_dfs_bfs(start_city,end_city,type):
 
 
 def solve_uniform(start_city,end_city,cost):
+    nodes_visited = 0
     visited = {}
     fringe = []
     trace_route = {}
@@ -166,15 +286,18 @@ def solve_uniform(start_city,end_city,cost):
         if temp[-1] in visited:
             pass
         else:
+            nodes_visited += 1
             trace_route[temp[-1]] = (temp[-2], temp[1], temp[2], temp[-3])
             visited[temp[-1]] = 1
+            visited_states[temp[-1].split(",")[-1][1:]] = 1
             for s in successors(temp,cost):
                 heapq.heappush(fringe,s)
     return False
 
 
-
+# Saw the video: https://www.youtube.com/watch?v=6TsL96NAZCo to understand the working of A*.
 def solve_a_star(start_city,end_city,cost):
+    nodes_visited = 0
     visited = {}
     fringe = []
     trace_route = {}
@@ -190,6 +313,7 @@ def solve_a_star(start_city,end_city,cost):
         if temp[-1] in visited:
             pass
         else:
+            nodes_visited += 1
             trace_route[temp[-1]] = (temp[-2], temp[2], temp[3], temp[-3])
             visited[temp[-1]] = temp[0]
             for s in successors_heuristic(temp,cost):
@@ -209,27 +333,27 @@ def solve_a_star(start_city,end_city,cost):
 
 start_city,end_city,routing_algorithm,cost_function = sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4]
 
+if start_city == end_city:
+    print "Start and End cities are the same!"
+    sys.exit(0)
 read_input("road-segments.txt")
 get_coordinates("city-gps.txt")
 
 if routing_algorithm == "bfs" or routing_algorithm == "dfs":
-    print_route(end_city,solve_dfs_bfs(start_city,end_city,routing_algorithm))
+    result = solve_dfs_bfs(start_city,end_city,routing_algorithm)
+    if result is False:
+        print "No Route found"
+    else:
+        print_route(end_city,result)
 elif routing_algorithm == "uniform":
-    print_route(end_city,solve_uniform(start_city,end_city,cost_function))
+    result = solve_uniform(start_city,end_city,cost_function)
+    if result is False:
+        print "No Route found"
+    else:
+        print_route(end_city,result)
 else:
-    print_route(end_city,solve_a_star(start_city,end_city,cost_function))
-
-
-
-#Test Cases:
-# San_Jose,_California Miami,_Florida uniform distance
-# San_Jose,_California Miami,_Florida heuristic heuristic
-# Seattle,_Washington Bloomington,_Indiana uniform distance
-# Seattle,_Washington Bloomington,_Indiana heuristic heuristic
-# Boston,_Massachusetts San_Francisco,_California heuristic heuristic
-# Boston,_Massachusetts San_Francisco,_California heuristic distance
-# Bloomington,_Indiana Chicago,_Illinois heuristic distance
-# Bloomington,_Indiana Chicago,_Illinois uniform distance
-# Abbot_Village,_Maine Fairborn,_Ohio heuristic distance
-
-
+    result = solve_a_star(start_city,end_city,cost_function)
+    if result is False:
+        print "No Route found"
+    else:
+        print_route(end_city,result)
