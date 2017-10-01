@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 # Professor David Crandall
 # B551 Elements of Artificial Intelligence
 # Yue Chen, Siddharth Jayant Pathak, and Raghottam Dilip Talwai
