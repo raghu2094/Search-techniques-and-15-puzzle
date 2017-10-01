@@ -95,6 +95,9 @@ def move_vertical(G,i,j,path):
         s.append(s2)
 
 
+#Calculates number of linear conflicts.
+#Referred https://github.com/jDramaix/SlidingPuzzle/blob/master/src/be/dramaix/ai/slidingpuzzle/server/search/heuristic/LinearConflict.java
+
 def Linear_conflict(LC):
     conflicts=0
     for row in range(4):
@@ -108,8 +111,6 @@ def Linear_conflict(LC):
                 else:
 
                     conflicts += 2
-
-
     for col in range(4):
         max = -1
         for row in range(4):
@@ -157,12 +158,12 @@ def successors(G,path):
              move_vertical(G,row,col,path)
              return s
 
+#Goal function
 def is_goal(s):
     if s==goal_state:
         return True
 
 #To check if a state is already existing in the fringe
-
 def check_infringe(succ,fringe):
     if len(fringe)==0:
         return(0,0,False)
@@ -230,7 +231,7 @@ def solve(matrix):
             del s[:]
     return False
 
-
+#To calculate inversions of a particular input state
 def check_parity(initial_puzzle):
 
     parity=[ele for l in initial_puzzle for ele in l]
