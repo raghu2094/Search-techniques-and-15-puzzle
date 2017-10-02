@@ -19,7 +19,7 @@
 # Initial State:  A configuration of 4*4 board including any arrangement of  numbered tiles from 1 to 15 and a  blank tile.
 #                 Each tile occupies exactly one place on the board.
 
-# Goal state: A sequential arrangement of tiles starting from 1 to 15 with each tile being having a unique position and
+# Goal state: A sequential arrangement of tiles starting from 1 to 15 with each tile having a unique position and
 #             the blank tile occupying the last position towards the right of the 15th tile.
 
 # Successor Function: This is a variant of the usual 15 puzzle problem wherein a tile can slide at the most 3 places in
