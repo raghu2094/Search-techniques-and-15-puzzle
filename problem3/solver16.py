@@ -44,42 +44,52 @@
 
 
 # For any given tile, it will have to travel at the least its Manhattan distance to reach its goal position.
-# But if it faces any other tile in its path leading into a linear conflict, then two moves will be added to its Manhattan distance as one of the two tiles would have to make way for the other so that both tiles reach their goal position.
-# In this case 2 moves will be added to the Manhattan distance of both tiles and both these tiles will have to travel at the least this distance moves to reach its goal.
-# The number of moves required would always be greater than the heuristic value. Hence linear conflict heuristic will never overestimate the actual number of moves required and will be admissible.
+# But if it faces any other tile in its path leading into a linear conflict, then two moves will be added to its Manhattan distance
+# as one of the two tiles would have to make way for the other so that both tiles reach their goal position.
+
+# In this case 2 moves will be added to the Manhattan distance of both tiles and both these tiles will have to travel
+# at the least this distance moves to reach its goal.
+# The number of moves required would always be greater than the heuristic value.
+# Hence linear conflict heuristic will never overestimate the actual number of moves required and will be admissible.
 
 # Search Algorithm
 
-# We have used an algorithm based on the search algorithm 3 for implemeting A*.
+# We have used designed the code based on the search algorithm 3 for implemeting A*.
 # Initial state is checked for the the goal condition. If not then it is added to the fringe
 # We have used fringe as s heap structure . The fringe will by default pop the state having the lowest cost first.
-# As soon as a state is popped, it is checked for the goal condition, if goal is reached, the path containing moves from the initial state is returned.
-# Otherwise the state is checked if it is already in the visited list. If so,then the next state with lowest cost is popped from the fringe.
-# If the state is not visited, then it is added to the visited list and is expanded to get its successors.
+# As soon as a state is popped, it is checked for the goal condition, if goal is reached, the path containing moves from
+# the initial state is returned. Otherwise the state is checked if it is already in the visited list. If so,then
+# the next state with lowest cost is popped from the fringe. If the state is not visited, then it is added to the
+# visited list and is expanded to get its successors.
 # The heuristic function is called and the total cost of reaching the goal state is calculated.
-# If a state is already existing in the fringe with a cost higher than the current cost, then the higher cost is ignored and the state is stored in the fringe with the current lower cost.
+# If a state is already existing in the fringe with a cost higher than the current cost, then the higher cost is ignored
+# and the state is stored in the fringe with the current lower cost.
 # If a state doesnt exists in the fringe, it is added to the fringe along with its associated cost
 # The steps are repeated until the goal state is found.
 
+
 # Problems Faced
 
-# The selection of the correct heuristic function was a big task. For problems such as the 15 puzzle, getting an optimal solution entirley depends on how strong the heuristic is.
-# We tried first using the Manhattan distance/3 as the heuristic function. But though it was giving a solution yet we found it is weak compared to linear conflict heuristic,
-# as for the same input state we got a solution in less number of moves.
+# The selection of the correct heuristic function was a big task. For problems such as the 15 puzzle, getting an optimal
+# solution entirley depends on how strong the heuristic is. We tried first using the Manhattan distance/3 as the heuristic function.
+# But though it was giving a solution yet we found it is weak compared to linear conflict heuristic, as for the same input
+# state we got a solution in less number of moves.
 
-# Though linear conflict heuristic is admissible and strong compared to other, yet we could not get solution for input states requiring large number of moves.
-# We tried executing the code for different test cases and at the most the code could solve a puzzle requiring 17 moves to reach the goal state within 3 mins.
+# Though linear conflict heuristic is admissible and strong compared to other, yet we could not get solution for input states
+# requiring large number of moves. We tried executing the code for different test cases and at the most the code could
+# solve a puzzle requiring 17 moves to reach the goal state within 3 mins.
 
 
 # Design Decisions:
 
-# Decided to use search algorithm 3 as this problem will have a large state space and there has to be some mechanism based on which only optimal states are expanded and
-# unecessary states are ignored. Using search algorithm 3 served this purpose.
+# Decided to use search algorithm 3 as this problem will have a large state space and there has to be some mechanism based on
+# which only optimal states are expanded and unecessary states are ignored. Using search algorithm 3 served this purpose.
 
-# Used a heapq for fringe. The total cost and the states are stored in a single tupple. The fringe being a heapq will automatically pop out the state with the lowest cost.
-# This avoids sorting states in the fringe according to the cost.
+# Used a heapq for fringe. The total cost and the states are stored in a single tupple. The fringe being a heapq will
+# automatically pop out the state with the lowest cost. This avoids sorting states in the fringe according to the cost.
 
-# Also implemented a check_parity function which will calculate the number of inversions on the input state and will return if the state is solvable or not.
+# Also implemented a check_parity function which will calculate the number of inversions on the input state and will
+# return if the state is solvable or not.
 # Referred: http://www.geeksforgeeks.org/check-instance-15-puzzle-solvable/
 
 
@@ -94,7 +104,9 @@ import heapq
 
 
 goal_state=[[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,0]]
-s=[] #stores the list of successors. It is a list of lists which each list consisting of the state and the moves taken to reach that state
+s=[] #stores the list of successors. It is a list of lists which each list consisting of the state and the moves
+     # taken to reach that state
+
 visited=[] #stores the list of visited states
 
 #To move blank tile in the horizontal direction
