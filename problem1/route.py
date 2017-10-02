@@ -3,7 +3,7 @@
 # Assignment 1, Question 1
 
 
-# The search problem has the given data and routes between several different cities. I stored all the routes along with their other info into a dictionary.
+# The search problem has the given data and routes between several different cities. We stored all the routes along with their other info into a dictionary.
 # Storing the data into dictionary made fetching the neighbour cities from its current cities fast in constant time.
 # Once the neighbour cities are found, the search algorithm determines which city to explore first.
 
@@ -21,43 +21,45 @@
 # For segment cost function, edge weight is constant 1. Each connection between two ciites is 1 segment in the search graph
 
 #Heuristic:
-# For A*, I used great circle distance between the current city and the goal city. For calculating great circle distance, I used the latitude and longitude
+# For A*, We used great circle distance between the current city and the goal city. For calculating great circle distance, We used the latitude and longitude
 # provided in the city-gps file for each city.
 # The data contains some noise, like few cities present in the city_routes file don't have their latitude and longitude present in city-gps file.
-# If the data is not present then I assumed the city's heuristic to be zero.
+# If the data is not present then We assumed the city's heuristic to be zero.
 # Because of absence of latitude and longitude values, the heuristic underestimates the cost, and makes it weak.
 # The heuristic is admissible, but not consistent. For majority of the cities it is admissible and consistent as the data gives the correct latitude and
 # longitude values. But for some cities, the latitude and longitude data is not correct, which makes the heuristic inadmissible in some test cases.
-# Heuristic is not consistent as some cities don't have correct data, because of which I kept track of city and its respective cost in visited array.
+# Heuristic is not consistent as some cities don't have correct data, because of which we kept track of city and its respective cost in visited array.
 # If the city has been visited before but with higher cost then visit it again.
-# For time heuristic, I divided the great circle distance by speed of 100. I assumed the value to be 100 as the maximum speed in the given data is 65.
-# For segment heuristic, I divided the great circle distance by 3000. I assumed the maximum number of segments between two cities to be 3000.
+# For time heuristic, We divided the great circle distance by speed of 100. We assumed the value to be 100 as the maximum speed in the given data is 65.
+# For segment heuristic, We divided the great circle distance by 3000. We assumed the maximum number of segments between two cities to be 3000.
+
+
 
 
 #Search Algorithm:
-#I defined three seach algorithm for BFS/DFS,Uniform Cost Search and A* search.
+# We defined three seach algorithm for BFS/DFS,Uniform Cost Search and A* search.
 # BFS search algorithm traverses nodes with minimum depth first. It doesn't consider the cost function. It also keeps track of visited states
 # to avoid expanding the same city twice.
 # In DFS search it pops the node and expands it as far as possible. It doesn't consider the cost function. It also keeps track of visited states
 # to avoid expanding the same city twice.
 # In uniform cost function, the algorithm pops the node which has the lowest edge weight in the fringe. The edge weight depends upom the cost function.
 # Edge weight is the cost till the parent city and the edge weight of parent city to its successors.
-# Uniform Cost function requires fringe to be a priority queue. I used Python's heapq module for implementing priority queue.
+# Uniform Cost function requires fringe to be a priority queue. We used Python's heapq module for implementing priority queue.
 # A* algorithm pops the node which has minimum edge weight. In case of A*, edge weight is the summation of the distance travelled till now plus the heuristic.
-# As the heuristic is not consistent, I kept track of the visited nodes along with their heuristic when they were visited. If the heuristic when they were visited
+# As the heuristic is not consistent, We kept track of the visited nodes along with their heuristic when they were visited. If the heuristic when they were visited
 # first is more than the current node's heuristic then expand the node again.
 
 
 #Problems faced:
-# Majority of the problems I faced were because of missing data. For example, once I decided my heuristic to be the great circle distance between two cities,
-# I was not able to calculate it for city as they didn't have latitude and longitude in the city-gps.txt file.
-# Also, some the cities have wrong latitude and longitude values. I thought my A* search algorithm is not working properly, but after looking into the data and a lot of debugging,
-# I realised that few cities don't have correct Latitude and Longitude values. For example, Mission_Hills,_California has wrong latitude and longitude values.
+# Majority of the problems We faced were because of missing data. For example, once We decided my heuristic to be the great circle distance between two cities,
+# We was not able to calculate it for city as they didn't have latitude and longitude in the city-gps.txt file.
+# Also, some the cities have wrong latitude and longitude values. We thought my A* search algorithm is not working properly, but after looking into the data and a lot of debugging,
+# We realised that few cities don't have correct Latitude and Longitude values. For example, Mission_Hills,_California has wrong latitude and longitude values.
 
 #Assumptions:
 
-# If in the given data, the distance between two cities is absent or 0 then I ignored that city.
-# Similarly, if speed between two cities is absent or 0 then I ignored that city.
+# If in the given data, the distance between two cities is absent or 0 then we ignored that city.
+# Similarly, if speed between two cities is absent or 0 then we ignored that city.
 # If a city doesn't have its latitude and longitude values in city-gps, city's heuristic to be 0.
 
 
@@ -80,12 +82,12 @@
 # Bloomington,_Indiana to Texas,_Dallas A* 544, 0.151 seconds UCS: 3987 0.227 seconds
 
 #3 Heuristic function:
-# I used Great Circle distance as heuristic value. It is admissible given the latitude and longitude values are accurate in the given data.
+# We used Great Circle distance as heuristic value. It is admissible given the latitude and longitude values are accurate in the given data.
 # As the data has noise, because of which some cities don't have latitude and longitude values.It makes the heuristic weak.
 # Heuristic function can be improved by having accurate data for all the cities.
 # Heuristic is not consistent, few nodes are expanded again, which decreases the efficiency of A* by some amount.
 # For time and segment cost function, the heuristic is weak. Heuristic gives data fro the distance between the two cities in miles.
-# It doesn't give information about the time or segments between them. I had to assume the maximum speed and maximum number of segments
+# It doesn't give information about the time or segments between them. We had to assume the maximum speed and maximum number of segments
 # between two cities to make. It makes heuristic weaker, but is admissible.
 
 
