@@ -17,14 +17,14 @@
 
 # Set of Valid States: Any state having 15 tiles in any order and a blank tile is a valid state.
 # Initial State:  A configuration of 4*4 board including any arrangement of  numbered tiles from 1 to 15 and a  blank tile.
-#                Each tile occupies exactly one place on the board.
+#                 Each tile occupies exactly one place on the board.
 
 # Goal state: A sequential arrangement of tiles starting from 1 to 15 with each tile being having a unique position and
-#            the blank tile occupying the last position towards the right of the 15th tile.
+#             the blank tile occupying the last position towards the right of the 15th tile.
 
 # Successor Function: This is a variant of the usual 15 puzzle problem wherein a tile can slide at the most 3 places in
 #                     left, right , up or down direction in a single move generating 6 possible successors for each state.
-#                    Each successor will have a cost and the path taken to reach from the parent state associated with it.
+#                     Each successor will have a cost and the path taken to reach from the parent state associated with it.
 
 # Edge Weights:-f(s)-  It is the sum of the cost of moving a tile and heuristic cost. f(s)= g(s)+h(s)
 #                      The Fringe will pop out the state with the lowest edge weight to get the successors of that state
@@ -32,15 +32,15 @@
 
 # Heuristic Function:-h(s)- We are using linear conflict heuristic.
 #                                        h(s)= MD/3 + lc *2
-#                   where MD is the total Manhattan distance and lc is the number of linear conflicts.
+#                           where MD is the total Manhattan distance and lc is the number of linear conflicts.
 
 # Manhattan Distance- The Manhattan Distance is the distance between tile's current position and its goal position.
-#                    We  are taking the total Manhattan distance for all the tiles and dividing by 3 in order to account
-#                    for the fact that in a each move maximum 3 tiles can be moved.
+#                     We  are taking the total Manhattan distance for all the tiles and dividing by 3 in order to account
+#                     for the fact that in a each move maximum 3 tiles can be moved.
 
 # Linear Conflict: Two tiles Ti and Tj are in a linear conflict if Ti and Tj are in the same line, the goal positions of
-#                 Ti and Tj  are both in that line, Ti is to the right of Tj and goal position of Ti is to the left of
-#                 the goal position of Tj.(Referred: https://heuristicswiki.wikispaces.com/Linear+Conflict)
+#                  Ti and Tj  are both in that line, Ti is to the right of Tj and goal position of Ti is to the left of
+#                  the goal position of Tj.(Referred: https://heuristicswiki.wikispaces.com/Linear+Conflict)
 
 
 # For any given tile, it will have to travel at the least its Manhattan distance to reach its goal position.
