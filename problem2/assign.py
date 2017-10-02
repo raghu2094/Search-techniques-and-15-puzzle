@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#! /l/python3/bin/python3
 
 # Professor David Crandall
 # B551 Elements of Artificial Intelligence
@@ -7,7 +7,24 @@
 
 # Problem 2
 
+# We define this problem as a problem that could employ A* search. The state space is every possible combination of one
+# to three people forming a group. The successor function adds people into a group if there are less than three people
+# in the current group, otherwise it creates an empty group and adds people into the new empty group. The edge weights
+# are the time consumption from the initial state (i.e. no people in any group at all) to the current state. There is a
+# detailed description of our heuristic function in the in-line comment.
+
+# Our search algorithm is a classic A* search that expands the most promising node considering both the sinking cost and
+# possible future cost.
+
+# The most challenging problem we faced was that the problem is NP-hard. We are employing dynamic programming techniques
+# but we are also very much aware that the optimal sub-decisions do not guarantee the optimal final decision. We could
+# have our program do a traversal of the search tree and come up with "the best" solution, but that is computationally
+# less feasible. We are, as of now, returning the "a (relatively) best" solution but significantly cutting down our
+# processing time. We believe this is the right decision to make.
+
 class Survey:
+
+    # saves students' information and their preferences.
 
     count = 0
 
@@ -21,8 +38,11 @@ class Survey:
     def __repr__(self):
         return self.name
 
+        # Yingnan Ju helped me finding this method to simplify the printing job.
 
 def successors(state):
+
+    # generates successors of a given state.
 
     successorState = []
 
@@ -38,12 +58,18 @@ def successors(state):
     return successorState
 
 def is_goal(state):
+
+    # returns a boolean value of a state's goal status.
+
     if len(state.unassigned) == 0:
         return True
     else:
         return False
 
 class State:
+
+    # This is the major class for storing states' information and providing necessary methods for other functions to
+    # access them.
 
     gradeTime = 0
     emailTime = 0
@@ -57,7 +83,9 @@ class State:
 
     def __init__(self, assigned, people):
 
-        # Yingnan Ju helped me with 2-dimensional list copy-and-paste.
+        # Yingnan Ju helped me with 2-dimensional list copy-and-paste. I found out that deepcopy method was not what I
+        # was looking for.
+
         self.assigned = []
         for eachGroup in assigned:
             self.assigned.append(list(eachGroup))
@@ -86,8 +114,11 @@ class State:
                     if notPreferred in list(group[i].name for i in range(0, len(group))):
                         sinkingCost += State.meetTime
 
-        # The lowest possible remaining cost given all assigned groups have 3 people and all unassigned groups will have 3 people
+        # The lowest possible remaining cost given all assigned groups have 3 people and all unassigned groups will have
+        # 3 people.
+
         # heuristic = ((Survey.count - len(self.assigned) *3 ) // 3 + (1 if (Survey.count - len(self.assigned) * 3) % 3 > 0 else 0)) * State.gradeTime
+
         heuristic = math.ceil((Survey.count - len(self.assigned) * 3) / 3) * State.gradeTime
 
         self.priority = sinkingCost + heuristic
@@ -116,9 +147,11 @@ def solve(initialState):
     else:
         fringe = [initialState]
         while len(fringe) > 0:
+
             # print(len(fringe))
             # print([state.priority for state in fringe])
             # if fringe.pop(0), djcran and kapadia will be stuck together forever :)
+
             for s in successors(fringe.pop()):
                 if is_goal(s):
                     return s
@@ -134,7 +167,7 @@ def solve(initialState):
 
 # main()
 
-import sys, copy, math
+import sys, math
 
 inputFileName = sys.argv[1]
 gradeTime = int(sys.argv[2])
