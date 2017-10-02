@@ -1,4 +1,4 @@
-
+#!/usr/bin/env python
 # Fall 2017, B-551 Elements of AI. Prof. Crandall
 # Assignment 1, Question 1
 
